@@ -142,46 +142,80 @@ scp root@YOUR_VPS_IP:/var/www/vlights-ar/data/vlights.db ./backup.db
 
 ---
 
-## OpenClaw AI Assistant Setup (Free, No API Fees)
+## PopeBot — Free Autonomous AI Agent (24/7)
 
-Based on [this video](https://www.youtube.com/watch?v=8uP2IrP3IG8) by Stephen G. Pope — run a personal AI assistant locally with zero cost.
+Based on [this video](https://www.youtube.com/watch?v=8uP2IrP3IG8) by [Stephen G. Pope](https://github.com/stephengpope/thepopebot) — run a free autonomous AI agent using Docker + Ollama + GitHub Actions.
 
 ### Quick setup
 
 ```bash
-# Run the automated setup script
-bash setup-openclaw.sh
+bash setup-popebot.sh
 ```
 
 ### What it installs
 
 | Component | Purpose |
 |-----------|---------|
-| **Ollama** | Local LLM runtime — runs AI models on your hardware |
-| **Local model** | qwen3 (8B/14B/32B) — no API fees, full privacy |
-| **OpenClaw** | AI assistant that connects to Telegram, WhatsApp, Slack, etc. |
+| **Ollama** | Free local LLM server — no API fees |
+| **PopeBot** | Autonomous AI agent framework (Docker-based) |
+| **Docker** | 3 containers: event handler, reverse proxy, runner |
+| **GitHub Actions** | Job execution, change tracking, approval workflows |
 
-### Requirements
+### Prerequisites
 
-- **Node.js 22+** (already installed for this project)
-- **GPU with 8GB+ VRAM** recommended for local models (or use free cloud models)
-- **Linux, macOS, or Windows with WSL2**
+- **Node.js 18+**, npm, Git
+- **GitHub CLI** (`gh`) — [cli.github.com](https://cli.github.com)
+- **Docker + Docker Compose** — [docker.com](https://www.docker.com)
+- **ngrok** (local only) — [ngrok.com](https://ngrok.com) (free account)
+
+### Architecture (from the video)
+
+```
+┌─────────────────────────────────────────┐
+│            Docker Compose               │
+│  ┌──────────────┐  ┌────────────────┐   │
+│  │ Event Handler│  │ Reverse Proxy  │   │
+│  │ (PopeBot)    │  │ (Traefik/SSL)  │   │
+│  └──────┬───────┘  └────────────────┘   │
+│         │          ┌────────────────┐   │
+│         └─────────►│    Runner      │   │
+│                    │ (GitHub Actions)│   │
+│                    └────────────────┘   │
+└─────────────────────────────────────────┘
+         │                    │
+    ┌────▼────┐         ┌────▼────┐
+    │ Ollama  │         │ GitHub  │
+    │(Free AI)│         │  Repo   │
+    └─────────┘         └─────────┘
+```
 
 ### Usage after setup
 
 ```bash
-# Launch with local model (free, private)
-ollama launch openclaw --model qwen3:8b
+# Start the agent
+cd ~/my-agent && docker compose up -d
 
-# Or use free cloud models (no GPU needed)
-ollama launch openclaw --model kimi-k2.5:cloud
+# Access web chat at your APP_URL (ngrok or server URL)
+# Create admin account on first visit
 
-# Connect messaging apps
-openclaw configure --section channels
+# Set up Telegram (optional)
+npm run setup-telegram
 
-# Open dashboard
-openclaw dashboard
+# View logs
+docker compose logs -f
+
+# Stop the agent
+docker compose down
 ```
+
+### Key features
+
+- **Heartbeat** — schedule recurring tasks (email, research, etc.)
+- **Web chat** — streaming AI chat with file/PDF upload support
+- **Swarm view** — monitor all running jobs
+- **Auto-upgrade** — one-click updates from the web UI
+- **API access** — POST jobs programmatically via webhook
+- **Git-based audit** — every agent action is a git commit
 
 ---
 
