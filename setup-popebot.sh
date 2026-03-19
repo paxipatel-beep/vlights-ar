@@ -150,7 +150,7 @@ fi
 # -----------------------------------------------------------
 step "Step 4/5: Creating PopeBot project"
 
-AGENT_DIR="$HOME/my-agent"
+AGENT_DIR="$HOME/paxi-popebot"
 
 echo ""
 read -rp "Agent directory [$AGENT_DIR]: " CUSTOM_DIR
