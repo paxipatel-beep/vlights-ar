@@ -142,4 +142,47 @@ scp root@YOUR_VPS_IP:/var/www/vlights-ar/data/vlights.db ./backup.db
 
 ---
 
+## OpenClaw AI Assistant Setup (Free, No API Fees)
+
+Based on [this video](https://www.youtube.com/watch?v=8uP2IrP3IG8) by Stephen G. Pope — run a personal AI assistant locally with zero cost.
+
+### Quick setup
+
+```bash
+# Run the automated setup script
+bash setup-openclaw.sh
+```
+
+### What it installs
+
+| Component | Purpose |
+|-----------|---------|
+| **Ollama** | Local LLM runtime — runs AI models on your hardware |
+| **Local model** | qwen3 (8B/14B/32B) — no API fees, full privacy |
+| **OpenClaw** | AI assistant that connects to Telegram, WhatsApp, Slack, etc. |
+
+### Requirements
+
+- **Node.js 22+** (already installed for this project)
+- **GPU with 8GB+ VRAM** recommended for local models (or use free cloud models)
+- **Linux, macOS, or Windows with WSL2**
+
+### Usage after setup
+
+```bash
+# Launch with local model (free, private)
+ollama launch openclaw --model qwen3:8b
+
+# Or use free cloud models (no GPU needed)
+ollama launch openclaw --model kimi-k2.5:cloud
+
+# Connect messaging apps
+openclaw configure --section channels
+
+# Open dashboard
+openclaw dashboard
+```
+
+---
+
 *Built with [Perplexity Computer](https://www.perplexity.ai/computer)*
