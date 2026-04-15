@@ -1,0 +1,104 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - claude/install-ruflo-fresh-oY2tA
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hostinger VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 72.62.231.37
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          command_timeout: 10m
+          script: |
+            set -e
+            APP_DIR=/var/www/computer
+            BRANCH=claude/install-ruflo-fresh-oY2tA
+
+            # First-time setup: install system deps
+            if ! command -v node &>/dev/null; then
+              echo "--- Installing Node.js ---"
+              apt-get update -qq
+              apt-get install -y -qq curl git nginx
+              curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+              apt-get install -y -qq nodejs
+              npm install -g pm2
+            fi
+
+            if ! command -v nginx &>/dev/null; then
+              apt-get install -y -qq nginx
+            fi
+
+            # Clone or pull latest code
+            if [ -d "$APP_DIR/.git" ]; then
+              echo "--- Updating app ---"
+              cd $APP_DIR
+              git fetch origin
+              git checkout $BRANCH
+              git reset --hard origin/$BRANCH
+            else
+              echo "--- Cloning repo ---"
+              rm -rf $APP_DIR
+              git clone --branch $BRANCH https://github.com/paxipatel-beep/vlights-ar.git $APP_DIR
+            fi
+
+            cd $APP_DIR
+            npm install --production
+
+            # Write .env (overwrite each deploy with latest secrets)
+            cat > $APP_DIR/.env <<ENVEOF
+            LLM_PROVIDER=openai
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            SEARCH_PROVIDER=mock
+            PORT=3000
+            NODE_ENV=production
+            OUTPUT_DIR=$APP_DIR/output
+            ENVEOF
+
+            mkdir -p $APP_DIR/output
+
+            # Start or restart app
+            if pm2 list | grep -q computer; then
+              pm2 restart computer
+            else
+              pm2 start $APP_DIR/src/api/server.js --name computer --cwd $APP_DIR
+              pm2 save
+              pm2 startup systemd -u root --hp /root 2>/dev/null | grep "sudo\|systemctl" | bash || true
+            fi
+
+            # Configure nginx (idempotent)
+            cat > /etc/nginx/sites-available/computer <<NGEOF
+            server {
+                listen 80;
+                server_name computer.paxipatelbot.in 72.62.231.37;
+
+                location / {
+                    proxy_pass http://127.0.0.1:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade \$http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_buffering off;
+                    proxy_read_timeout 86400;
+                }
+            }
+            NGEOF
+
+            ln -sf /etc/nginx/sites-available/computer /etc/nginx/sites-enabled/computer
+            rm -f /etc/nginx/sites-enabled/default
+            nginx -t && systemctl reload nginx
+
+            echo ""
+            echo "✅ Deployed! App running at http://72.62.231.37"
+            pm2 status
