@@ -1,0 +1,40 @@
+{
+  "models": {
+    "fast": "claude-haiku-4-5-20251001",
+    "capable": "claude-sonnet-4-6",
+    "powerful": "claude-opus-4-6"
+  },
+  "routing": {
+    "thresholds": {
+      "fast": 0.3,
+      "capable": 0.7
+    }
+  },
+  "agents": {
+    "planner": {
+      "model": "capable",
+      "maxTokens": 2048,
+      "description": "Decomposes goals into executable steps"
+    },
+    "researcher": {
+      "model": "capable",
+      "maxTokens": 4096,
+      "maxSearchResults": 5,
+      "description": "Web research and synthesis"
+    },
+    "coder": {
+      "model": "powerful",
+      "maxTokens": 8192,
+      "description": "Code generation and documentation"
+    },
+    "analyst": {
+      "model": "capable",
+      "maxTokens": 4096,
+      "description": "Data analysis and insights"
+    }
+  },
+  "orchestrator": {
+    "maxParallelSteps": 3,
+    "stepTimeoutMs": 120000
+  }
+}
