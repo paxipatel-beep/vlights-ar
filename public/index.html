@@ -61,29 +61,15 @@
     flex-shrink: 0;
     overflow: hidden;
   }
-  .sidebar-header {
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-  }
+  .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
   .btn-new {
-    width: 100%;
-    padding: 10px 16px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
+    width: 100%; padding: 10px 16px; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
   }
   .btn-new:hover { background: var(--accent-light); }
 
-  .task-list {
-    overflow-y: auto;
-    flex: 1;
-    padding: 8px;
-  }
+  .task-list { overflow-y: auto; flex: 1; padding: 8px; }
   .task-item {
     padding: 10px 12px;
     border-radius: 8px;
@@ -129,31 +115,15 @@
   .prompt-view p { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
   .input-wrap { position: relative; }
   textarea#goal-input {
-    width: 100%;
-    padding: 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    color: var(--text);
-    font-size: 15px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 100px;
-    outline: none;
-    transition: border-color 0.15s;
+    width: 100%; padding: 16px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); font-size: 15px; font-family: inherit;
+    resize: vertical; min-height: 100px; outline: none; transition: border-color 0.15s;
   }
   textarea#goal-input:focus { border-color: var(--accent); }
   .btn-submit {
-    margin-top: 12px;
-    padding: 12px 32px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
+    margin-top: 12px; padding: 12px 32px; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
   }
   .btn-submit:hover { background: var(--accent-light); }
   .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -441,10 +411,7 @@
     es.onmessage = (e) => {
       try { updateTaskDOM(JSON.parse(e.data)); } catch {}
     };
-    es.onerror = () => {
-      // SSE will reconnect automatically; close only if task is done
-      const task = null; // we rely on DOM state
-    };
+    es.onerror = () => {}; // SSE auto-reconnects; rely on DOM state
   }
 
   async function loadTask(taskId) {
