@@ -4,6 +4,11 @@
     "capable": "claude-sonnet-4-6",
     "powerful": "claude-opus-4-6"
   },
+  "openaiModels": {
+    "fast": "gpt-4o-mini",
+    "capable": "gpt-4o",
+    "powerful": "gpt-4o"
+  },
   "routing": {
     "thresholds": {
       "fast": 0.3,
