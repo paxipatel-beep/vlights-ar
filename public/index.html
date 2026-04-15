@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer — Autonomous AI Agent</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --card: #1a1a1a;
+    --border: #2a2a2a;
+    --accent: #7c3aed;
+    --accent-light: #9d5fff;
+    --text: #e8e8e8;
+    --muted: #888;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --sidebar-w: 280px;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    flex-shrink: 0;
+  }
+  .logo { font-size: 18px; font-weight: 700; color: var(--accent-light); letter-spacing: -0.3px; }
+  .tagline { color: var(--muted); font-size: 13px; }
+
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .btn-new {
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-new:hover { background: var(--accent-light); }
+
+  .task-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px;
+  }
+  .task-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+  .task-item:hover { background: #242424; }
+  .task-item.active { background: #252030; border-color: var(--accent); }
+  .task-goal {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-gray { background: #333; color: var(--muted); }
+  .badge-blue { background: #1d3557; color: var(--blue); }
+  .badge-green { background: #14291e; color: var(--green); }
+  .badge-red { background: #2d1414; color: var(--red); }
+  .badge-blue.pulse { animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .sidebar-empty { color: var(--muted); padding: 16px 12px; font-size: 13px; }
+
+  .main { flex: 1; overflow-y: auto; padding: 32px; }
+  .prompt-view {
+    max-width: 640px;
+    margin: 80px auto 0;
+    text-align: center;
+  }
+  .prompt-view h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .prompt-view p { color: var(--muted); margin-bottom: 24px; font-size: 15px; }
+  .input-wrap { position: relative; }
+  textarea#goal-input {
+    width: 100%;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea#goal-input:focus { border-color: var(--accent); }
+  .btn-submit {
+    margin-top: 12px;
+    padding: 12px 32px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-submit:hover { background: var(--accent-light); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* TASK VIEW */
+  .task-view { max-width: 860px; }
+  .task-heading { font-size: 22px; font-weight: 700; margin-bottom: 20px; line-height: 1.3; }
+
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent-light);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* STEPS */
+  .steps-list { display: flex; flex-direction: column; gap: 8px; }
+  .step-card {
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .step-card.running { border-color: var(--blue); }
+  .step-card.complete { border-color: #1e3a28; }
+  .step-card.error { border-color: var(--red); }
+  .step-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .icon-research { background: #1a2a3a; }
+  .icon-code { background: #1a2a1a; }
+  .icon-analysis { background: #2a1a2a; }
+  .icon-synthesis { background: #2a2a1a; }
+  .step-body { flex: 1; min-width: 0; }
+  .step-desc { font-size: 13px; margin-bottom: 4px; }
+  .step-status-row { display: flex; align-items: center; gap: 6px; }
+  .step-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-pending { background: #555; }
+  .dot-running { background: var(--blue); animation: pulse 1s ease-in-out infinite; }
+  .dot-complete { background: var(--green); }
+  .dot-error { background: var(--red); }
+  .step-status-text { font-size: 11px; color: var(--muted); text-transform: capitalize; }
+
+  /* RESULTS */
+  .synthesis-box {
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    line-height: 1.7;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  .deliverables-list { display: flex; flex-direction: column; gap: 8px; }
+  .deliverable-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.1s;
+  }
+  .deliverable-item:hover { border-color: var(--accent); color: var(--accent-light); }
+  .deliverable-icon { font-size: 16px; }
+  .deliverable-name { font-size: 13px; flex: 1; }
+  .deliverable-dl { font-size: 11px; color: var(--muted); }
+
+  .error-box {
+    padding: 14px 16px;
+    background: #200a0a;
+    border: 1px solid var(--red);
+    border-radius: 10px;
+    color: #fca5a5;
+    font-size: 13px;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Computer</div>
+  <div class="tagline">Your autonomous AI agent</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <button class="btn-new" onclick="showPrompt()">+ New Task</button>
+    </div>
+    <div class="task-list" id="task-list">
+      <div class="sidebar-empty">No tasks yet.</div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="prompt-view" id="prompt-view">
+      <h1>What do you want to accomplish?</h1>
+      <p>Describe your goal and let the autonomous AI agent handle the rest.</p>
+      <div class="input-wrap">
+        <textarea id="goal-input" placeholder="e.g. Research the latest advances in quantum computing and write a technical summary..."></textarea>
+      </div>
+      <button class="btn-submit" id="submit-btn" onclick="handleSubmit()">Run Task</button>
+    </div>
+    <div class="task-view" id="task-view" style="display:none"></div>
+  </main>
+</div>
+
+<script>
+  let activeTaskId = null;
+  let activeStream = null;
+
+  // ─── STATUS HELPERS ───────────────────────────────────────────────
+  const IN_PROGRESS = new Set(['planning', 'executing', 'synthesizing']);
+
+  function badgeClass(status) {
+    if (status === 'complete') return 'badge badge-green';
+    if (status === 'error') return 'badge badge-red';
+    if (IN_PROGRESS.has(status)) return 'badge badge-blue pulse';
+    return 'badge badge-gray';
+  }
+
+  function stepIcon(type) {
+    const map = { research: '🔍', code: '💻', analysis: '📊', synthesis: '✨' };
+    const cls = { research: 'icon-research', code: 'icon-code', analysis: 'icon-analysis', synthesis: 'icon-synthesis' };
+    return `<div class="step-icon ${cls[type] || 'icon-research'}">${map[type] || '▶'}</div>`;
+  }
+
+  function fileIcon(name) {
+    if (name.endsWith('.md')) return '📄';
+    if (name.endsWith('.js') || name.endsWith('.ts') || name.endsWith('.py')) return '📝';
+    if (name.endsWith('.json')) return '{}';
+    if (name.endsWith('.csv')) return '📊';
+    return '📎';
+  }
+
+  function basename(p) { return p.split(/[\\/]/).pop(); }
+
+  // ─── SIDEBAR ──────────────────────────────────────────────────────
+  function renderSidebar(tasks) {
+    const el = document.getElementById('task-list');
+    if (!tasks.length) { el.innerHTML = '<div class="sidebar-empty">No tasks yet.</div>'; return; }
+    el.innerHTML = tasks.map(t => `
+      <div class="task-item${t.id === activeTaskId ? ' active' : ''}" onclick="loadTask('${t.id}')">
+        <div class="task-goal">${escHtml(t.goal)}</div>
+        <span class="${badgeClass(t.status)}">${t.status}</span>
+      </div>`).join('');
+  }
+
+  async function refreshSidebar() {
+    try {
+      const tasks = await api('/api/tasks');
+      renderSidebar(tasks);
+    } catch {}
+  }
+
+  // ─── VIEWS ────────────────────────────────────────────────────────
+  function showPrompt() {
+    activeTaskId = null;
+    closeStream();
+    document.getElementById('prompt-view').style.display = '';
+    document.getElementById('task-view').style.display = 'none';
+    document.getElementById('goal-input').value = '';
+    document.getElementById('submit-btn').disabled = false;
+    refreshSidebar();
+  }
+
+  function renderTask(task) {
+    const view = document.getElementById('task-view');
+    view.style.display = '';
+    document.getElementById('prompt-view').style.display = 'none';
+
+    const isLive = IN_PROGRESS.has(task.status);
+    const steps = task.plan || [];
+
+    const stepsHtml = steps.length ? steps.map(s => {
+      const dotCls = s.status === 'running' ? 'dot-running'
+        : s.status === 'complete' ? 'dot-complete'
+        : s.status === 'error' ? 'dot-error' : 'dot-pending';
+      return `
+        <div class="step-card ${s.status || 'pending'}" id="step-${s.id}">
+          ${stepIcon(s.type)}
+          <div class="step-body">
+            <div class="step-desc">${escHtml(s.description)}</div>
+            <div class="step-status-row">
+              <div class="step-dot ${dotCls}"></div>
+              <span class="step-status-text">${s.status || 'pending'}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('') : '<div style="color:var(--muted);font-size:13px">Generating plan...</div>';
+
+    const resultsHtml = task.status === 'complete' ? `
+      ${task.synthesis ? `
+        <div class="section">
+          <div class="section-title">Summary</div>
+          <div class="synthesis-box">${escHtml(task.synthesis)}</div>
+        </div>` : ''}
+      ${task.deliverables && task.deliverables.length ? `
+        <div class="section">
+          <div class="section-title">Deliverables</div>
+          <div class="deliverables-list">
+            ${task.deliverables.map(fp => {
+              const name = basename(fp);
+              return `<a class="deliverable-item" href="/api/output/${task.id}/${encodeURIComponent(name)}" download>
+                <span class="deliverable-icon">${fileIcon(name)}</span>
+                <span class="deliverable-name">${escHtml(name)}</span>
+                <span class="deliverable-dl">Download</span>
+              </a>`;
+            }).join('')}
+          </div>
+        </div>` : ''}
+    ` : '';
+
+    const errorHtml = task.status === 'error' ? `
+      <div class="section">
+        <div class="error-box">Error: ${escHtml(task.error || 'Unknown error')}</div>
+      </div>` : '';
+
+    view.innerHTML = `
+      <div class="task-heading">${escHtml(task.goal)}</div>
+      <div class="section">
+        <div class="section-title">Status</div>
+        <div class="status-bar">
+          ${isLive ? '<div class="spinner"></div>' : ''}
+          <span class="${badgeClass(task.status)}">${task.status}</span>
+          ${isLive ? '<span style="color:var(--muted);font-size:13px">Working…</span>' : ''}
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Steps</div>
+        <div class="steps-list">${stepsHtml}</div>
+      </div>
+      ${resultsHtml}
+      ${errorHtml}`;
+  }
+
+  function updateTaskDOM(task) {
+    if (task.id !== activeTaskId) return;
+    renderTask(task);
+    refreshSidebar();
+  }
+
+  // ─── SSE ──────────────────────────────────────────────────────────
+  function closeStream() {
+    if (activeStream) { activeStream.close(); activeStream = null; }
+  }
+
+  function openStream(taskId) {
+    closeStream();
+    const es = new EventSource(`/api/tasks/${taskId}/stream`);
+    activeStream = es;
+    es.onmessage = (e) => {
+      try { updateTaskDOM(JSON.parse(e.data)); } catch {}
+    };
+    es.onerror = () => {
+      // SSE will reconnect automatically; close only if task is done
+      const task = null; // we rely on DOM state
+    };
+  }
+
+  // ─── LOAD TASK ────────────────────────────────────────────────────
+  async function loadTask(taskId) {
+    activeTaskId = taskId;
+    closeStream();
+    try {
+      const task = await api(`/api/tasks/${taskId}`);
+      renderTask(task);
+      refreshSidebar();
+      if (IN_PROGRESS.has(task.status) || task.status === 'pending') {
+        openStream(taskId);
+      }
+    } catch (err) {
+      console.error('loadTask error', err);
+    }
+  }
+
+  // ─── SUBMIT ───────────────────────────────────────────────────────
+  async function handleSubmit() {
+    const input = document.getElementById('goal-input');
+    const goal = input.value.trim();
+    if (!goal) return;
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    try {
+      const task = await api('/api/tasks', { method: 'POST', body: JSON.stringify({ goal }) });
+      activeTaskId = task.id;
+      renderTask(task);
+      refreshSidebar();
+      openStream(task.id);
+    } catch (err) {
+      alert('Failed to create task: ' + err.message);
+      btn.disabled = false;
+    }
+  }
+
+  // ─── API HELPER ───────────────────────────────────────────────────
+  async function api(url, opts = {}) {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  }
+
+  function escHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────────
+  refreshSidebar();
+  setInterval(refreshSidebar, 3000);
+
+  // Allow Cmd/Ctrl+Enter to submit
+  document.getElementById('goal-input').addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') handleSubmit();
+  });
+</script>
+</body>
+</html>
