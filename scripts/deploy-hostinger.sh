@@ -32,8 +32,7 @@ fi
 echo "==> VPS IP: $VPS_IP"
 echo "==> Deploying to $VPS_IP..."
 
-# Prompt for Anthropic API key
-read -rp "Enter your ANTHROPIC_API_KEY: " ANTHROPIC_KEY
+read -rp "Enter your OPENAI_API_KEY: " OPENAI_KEY
 
 ssh -o StrictHostKeyChecking=no root@"$VPS_IP" bash <<ENDSSH
 set -e
@@ -59,7 +58,8 @@ npm install --production
 
 echo "--- Writing .env ---"
 cat > $APP_DIR/.env <<EOF
-ANTHROPIC_API_KEY=$ANTHROPIC_KEY
+LLM_PROVIDER=openai
+OPENAI_API_KEY=$OPENAI_KEY
 SEARCH_PROVIDER=mock
 PORT=$APP_PORT
 NODE_ENV=production
