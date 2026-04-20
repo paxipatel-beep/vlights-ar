@@ -1,7 +1,7 @@
 # Graph Report - /home/user/vlights-ar  (2026-04-20)
 
 ## Corpus Check
-- 10 files · ~5,780 words
+- 10 files · ~10,031 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -40,8 +40,8 @@
   /home/user/vlights-ar/src/agents/researcher.js → /home/user/vlights-ar/src/utils/claude.js
 - `execute()` --calls--> `writeReport()`  [INFERRED]
   /home/user/vlights-ar/src/agents/researcher.js → /home/user/vlights-ar/src/tools/deliverable.js
-- `executeTask()` --calls--> `plan()`  [INFERRED]
-  /home/user/vlights-ar/src/orchestrator/index.js → /home/user/vlights-ar/src/agents/planner.js
+- `plan()` --calls--> `executeTask()`  [INFERRED]
+  /home/user/vlights-ar/src/agents/planner.js → /home/user/vlights-ar/src/orchestrator/index.js
 
 ## Communities
 

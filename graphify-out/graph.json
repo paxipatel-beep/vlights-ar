@@ -558,8 +558,8 @@
       "source_file": "/home/user/vlights-ar/src/orchestrator/index.js",
       "source_location": "L60",
       "weight": 1.0,
-      "_src": "index_executetask",
-      "_tgt": "planner_plan",
+      "_src": "planner_plan",
+      "_tgt": "index_executetask",
       "source": "planner_plan",
       "target": "index_executetask"
     },
@@ -870,8 +870,8 @@
       "source_file": "/home/user/vlights-ar/src/tools/deliverable.js",
       "source_location": "L21",
       "weight": 1.0,
-      "_src": "deliverable_writereport",
-      "_tgt": "index_now",
+      "_src": "index_now",
+      "_tgt": "deliverable_writereport",
       "source": "index_now",
       "target": "deliverable_writereport"
     },
